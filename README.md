@@ -43,25 +43,41 @@ permissions seem to screw something up.
 The bot will only process messages from server administrators.
 
 ```t:about```
+
 Shows copyright information.
+
 ```t:clear USER```
+
 Strikes every case associated with the given user.  See t:strike.
+
 ```t:help```
+
 Shows this list of commands.
+
 ```t:info USER```
+
 Shows all of a user's cases.
+
 ```t:justify # REASON...```
+
 Sets the reason field of a case.
+
 ```t:list```
+
 Lists all tracked users and their removal counts.
+
 ```t:show #```
+
 Sends an untracked copy of a case's info.
+
 ```t:strike #```
+
 Strikes the given case.  A stricken case will have its log removed, and will not count against the OP.  This is Arnie's favourite command.
 
 ## License
 
 Tattle - a Discord bot for transparency in Reddit moderation
+
 Copyright 2017, 2018 Declan Hoare
 
 This program is free software: you can redistribute it and/or modify
