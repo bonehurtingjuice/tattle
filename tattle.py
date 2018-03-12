@@ -129,7 +129,7 @@ async def about(message):
 		.add_field
 		(
 			name = "Source code",
-			value = "https://github.com/RogueAI42/tattle",
+			value = "https://github.com/NetwideRogue/tattle",
 			inline = False
 		)
 		.set_footer(text = ident))
