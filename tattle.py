@@ -148,7 +148,7 @@ def validate(casenum):
 # Shorthand to get the log message for a case.  It might not be obvious,
 # but this function is effectively async.
 def get_msg(casenum):
-	return client.get_message(removed_posts, state.cases[casenum].msgid)
+	return client.get_message(removals_channel, state.cases[casenum].msgid)
 
 # Shorthand to send a case's embed.
 async def do_show(channel, casenum):
@@ -248,9 +248,9 @@ async def list(message):
 # events to a puny bot, no siree bob.
 async def loop():
 	await client.wait_until_ready()
-	global removed_posts, sub_mod_talk
-	removed_posts = client.get_channel(config["removed_posts"])
-	sub_mod_talk = client.get_channel(config["sub_mod_talk"])
+	global removals_channel, alert_channel
+	removals_channel = client.get_channel(config["removals_channel"])
+	alert_channel = client.get_channel(config["alert_channel"])
 	while not client.is_closed:
 		try:
 			nowtime = datetime.datetime.now().strftime(
@@ -318,11 +318,11 @@ async def loop():
 			state.cases += [None] * (casenum - len(state.cases))
 			
 			for log in reversed(logs):
-				log.msgid = (await client.send_message(removed_posts, embed = log.embed)).id
+				log.msgid = (await client.send_message(removals_channel, embed = log.embed)).id
 				state.cases[int(log.embed.fields[6].value)] = log
 			
 			for user in users:
-				await client.send_message(sub_mod_talk, f"<@&{config['alert_role']}> /u/{user} has made {len(state.users[user])} removed posts.")
+				await client.send_message(alert_channel, f"<@&{config['alert_role']}> /u/{user} has made {len(state.users[user])} removed posts.")
 			
 			print("All log entries have been dispatched to Discord.")
 			if newlastupdate > state.lastupdate:
