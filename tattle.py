@@ -172,7 +172,9 @@ def parse_user(message):
 		raise safe_exception("Please specify a username.")
 	if user.startswith("u/"):
 		user = user[2:]
-	if user not in state.users:
+	try:
+		user = next(u for u, c in zip(state.users, map(str.upper, state.users)) if c == user.upper())
+	except StopIteration:
 		raise safe_exception(f"There are no cases associated with /u/{user}.")
 	return user
 
