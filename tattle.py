@@ -263,6 +263,8 @@ async def loop():
 			for log in subreddit.mod.log(action = "removelink", limit = None):
 				if log.created_utc <= state.lastupdate:
 					break
+				if log.mod == "AutoModerator":
+					continue
 				case = thing()
 				case.embed = (discord.Embed
 					(colour = discord.Colour.blue())
