@@ -25,8 +25,8 @@ Before you can use the bot, you need to fill in config information in
 	},
 	"discord": "DISCORD BOT USER TOKEN",
 	"subreddit": "SUBREDDIT NAME",
-	"removed_posts": "CHANNEL ID FOR REMOVAL LOGS",
-	"sub_mod_talk": "CHANNEL ID FOR USER ALERTS",
+	"log_channel": "CHANNEL ID FOR REMOVAL LOGS",
+	"alert_channel": "CHANNEL ID FOR USER ALERTS",
 	"alert_role": "ROLE TO PING FOR USER ALERTS"
 }
 ```
