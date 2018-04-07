@@ -188,7 +188,12 @@ async def info(message):
 	user = parse_user(message)
 	print(state.users[user])
 	for casenum in state.users[user]:
-		await do_show(message.channel, casenum)
+		try:
+			validate(casenum)
+		except safe_exception:
+			await send_success(message.channel, f"Case #{casenum} was stricken.")
+		else:
+			await do_show(message.channel, casenum)
 
 async def do_strike(casenum):
 	try:
