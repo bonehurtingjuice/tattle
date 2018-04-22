@@ -38,7 +38,7 @@ print()
 print(copy)
 print()
 print("Loading modules...")
-import json, sys, os, pickle, datetime, asyncio, traceback
+import json, sys, os, pickle, datetime, asyncio, traceback, urllib, random
 import praw, discord, discord.gateway
 
 try:
@@ -248,6 +248,15 @@ async def list(message):
 		.add_field(name = "Removals", value = l)
 		.set_footer(text = ident))
 
+@cmd("People posing perpendicularly.")
+async def pose(message):
+        random.seed((datetime.datetime.now() - datetime.datetime(2018, 4, 20)).days)
+                with open("poses.txt") as posef:
+                        poseurl = random.choice(posef.readlines())
+
+                with urllib.request.urlopen(poseurl) as fobj:
+                        await client.send_file(message.channel, fobj, filename = poseurl.split("/")[-1])
+        
 # Our loop polls Reddit every 30 seconds, because such a big and
 # important and oh so cool Web site wouldn't be caught dead pushing
 # events to a puny bot, no siree bob.
