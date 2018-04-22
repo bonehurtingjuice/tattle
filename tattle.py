@@ -250,12 +250,12 @@ async def list(message):
 
 @cmd("People posing perpendicularly.")
 async def pose(message):
-        random.seed((datetime.datetime.now() - datetime.datetime(2018, 4, 20)).days)
-                with open("poses.txt") as posef:
-                        poseurl = random.choice(posef.readlines())
-
-                with urllib.request.urlopen(poseurl) as fobj:
-                        await client.send_file(message.channel, fobj, filename = poseurl.split("/")[-1])
+	random.seed((datetime.datetime.now() - datetime.datetime(2018, 4, 20)).days)
+	with open("poses.txt") as posef:
+		poseurl = random.choice(posef.read().splitlines())
+	
+	with urllib.request.urlopen(urllib.request.Request(poseurl, headers = {"User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)"})) as fobj:
+		await client.send_file(message.channel, fobj, filename = poseurl.split("/")[-1])
         
 # Our loop polls Reddit every 30 seconds, because such a big and
 # important and oh so cool Web site wouldn't be caught dead pushing
