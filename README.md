@@ -62,9 +62,13 @@ Shows all of a user's cases.
 
 Sets the reason field of a case.
 
-```t:list```
+```t:pose```
 
-Lists all tracked users and their removal counts.
+People posing perpendicularly.
+
+```t:scores```
+
+Lists all moderators and how many posts they have removed.
 
 ```t:show #```
 
@@ -73,6 +77,10 @@ Sends an untracked copy of a case's info.
 ```t:strike #```
 
 Strikes the given case.  A stricken case will have its log removed, and will not count against the OP.  This is Arnie's favourite command.
+
+```t:users```
+
+Lists all tracked users and their removal counts.
 
 ## License
 

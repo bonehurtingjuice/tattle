@@ -238,15 +238,19 @@ async def justify(message):
 	save_state()
 	await send_success(message.channel, f"The reason for case #{casenum} has been set to: {reason}")
 
-@cmd("Lists all tracked users and their removal counts.")
-async def list(message):
-	l = "\n".join(f"/u/{k} - {len(v)}" for k, v in sorted(state.users.items()))
-	if not l:
-		l = "\u200b" # Empty embed fields not allowed
+# Formats a list into a string and sends it in an embed.
+async def send_list(message, l, name):
+	ls = "\n".join(l)
+	if not ls:
+		ls = "\u200b" # Empty embed fields not allowed
 	await client.send_message(message.channel,
 		embed = discord.Embed(colour = discord.Colour.dark_red())
-		.add_field(name = "Removals", value = l)
+		.add_field(name = name, value = ls)
 		.set_footer(text = ident))
+
+@cmd("Lists all tracked users and their removal counts.")
+async def users(message):
+	await send_list(message, (f"/u/{k} - {len(v)}" for k, v in sorted(state.users.items())), "Removals")
 
 @cmd("People posing perpendicularly.")
 async def pose(message):
@@ -256,7 +260,14 @@ async def pose(message):
 	
 	with urllib.request.urlopen(urllib.request.Request(poseurl, headers = {"User-Agent": "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.1; SV1)"})) as fobj:
 		await client.send_file(message.channel, fobj, filename = poseurl.split("/")[-1])
-        
+
+@cmd("Lists all moderators and how many posts they have removed.")
+async def scores(message):
+	mods = list(set(c.embed.fields[3].value for c in state.cases))
+	await send_list(message, (f"/u/{n} - {s}"
+		for n, s in sorted(zip(mods, (sum(1 for c in state.cases if c.embed.fields[3].value == n) for n in mods)),
+			key = lambda p: p[1], reverse = True)), "Leaderboard")
+
 # Our loop polls Reddit every 30 seconds, because such a big and
 # important and oh so cool Web site wouldn't be caught dead pushing
 # events to a puny bot, no siree bob.
