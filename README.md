@@ -78,6 +78,10 @@ Sends an untracked copy of a case's info.
 
 Strikes the given case.  A stricken case will have its log removed, and will not count against the OP.  This is Arnie's favourite command.
 
+```t:update```
+
+Updates Tattle to the latest version.
+
 ```t:users```
 
 Lists all tracked users and their removal counts.
