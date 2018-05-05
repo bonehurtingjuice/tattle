@@ -314,7 +314,7 @@ async def update(message):
 			.set_footer(text = ident))
 		return
 	await client.edit_message(updater, embed = discord.Embed(colour = discord.Colour.gold())
-		.add_field(name = "Updater", value = f"Downloading version {remote_version}...")
+		.add_field(name = "Updater", value = f"Downloading version {state.remote_version}...")
 		.set_footer(text = ident))
 	repo.remote("origin").pull()
 	restart()
