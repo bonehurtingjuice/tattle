@@ -99,7 +99,8 @@ except FileNotFoundError:
 	state.cases = []
 	state.updater = None
 	state.remote_version = None
-	state_lock = asyncio.Lock()
+
+state_lock = asyncio.Lock()
 
 def save_state():
 	print("Saving.")
@@ -306,9 +307,9 @@ async def update(message):
 		.add_field(name = "Updater", value = "Checking for updates...")
 		.set_footer(text = ident))
 	state.updater = (updater.channel, updater.id)
-	save_state()
 	with urllib.request.urlopen(urllib.request.Request("https://api.github.com/repos/bonehurtingjuice/tattle/commits/HEAD", headers = {"Accept": "application/vnd.github.full.sha"})) as fobj:
 		state.remote_version = fobj.read(7).decode()
+	save_state()
 	if state.remote_version == version:
 		state.updater = None
 		await client.edit_message(updater, embed = discord.Embed(colour = discord.Colour.green())
