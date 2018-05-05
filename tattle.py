@@ -313,7 +313,7 @@ async def update(message):
 			.add_field(name = "Updater", value = "Tattle is already up-to-date.")
 			.set_footer(text = ident))
 		return
-	await client.edit_message(updater, embed = discord.Embed(colour = discord.Colour.yellow())
+	await client.edit_message(updater, embed = discord.Embed(colour = discord.Colour.gold())
 		.add_field(name = "Updater", value = f"Downloading version {remote_version}...")
 		.set_footer(text = ident))
 	repo.remote("origin").pull()
