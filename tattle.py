@@ -15,8 +15,9 @@
 # You should have received a copy of the GNU Affero General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-version = 2
-ident = f"Tattle v{version}"
+ident_fmt = "Tattle {0}"
+version = "v3"
+
 copy = """Tattle - a Discord bot for transparency in Reddit moderation
 Copyright 2017, 2018 Declan Hoare
 
@@ -33,13 +34,34 @@ GNU Affero General Public License for more details.
 You should have received a copy of the GNU Affero General Public License
 along with this program.  If not, see <https://www.gnu.org/licenses/>."""
 
-print(ident)
+print(ident_fmt.format(version))
 print()
 print(copy)
 print()
 print("Loading modules...")
 import json, sys, os, pickle, datetime, asyncio, traceback, urllib, random
 import praw, discord, discord.gateway
+
+git = True
+
+try:
+	import git
+except ImportError:
+	git_error = "GitPython is not installed.  The updater won't work."
+	git = False
+
+if git:
+	try:
+		repo = git.repo.base.Repo(".")
+	except git.exc.InvalidGitRepositoryError:
+		git_error = "Tattle's Git information is missing.  The updater won't work."
+		git = False
+	version = repo.rev_parse("HEAD").hexsha[:7]
+
+ident = ident_fmt.format(version)
+
+if not git:
+	print(git_error)
 
 try:
 	with open("config.json") as fobj:
@@ -75,6 +97,9 @@ except FileNotFoundError:
 	print(f"Cutoff timestamp: {state.lastupdate}")
 	state.users = {}
 	state.cases = []
+	state.updater = None
+	state.remote_version = None
+	state_lock = asyncio.Lock()
 
 def save_state():
 	print("Saving.")
@@ -87,6 +112,10 @@ subreddit = reddit.subreddit(config["subreddit"])
 print("Connected to Reddit.")
 
 client = discord.Client()
+
+# Restarts the bot process.
+def restart():
+	os.execv(sys.executable, [sys.executable] + sys.argv)
 
 async def send_success(channel, message):
 	await client.send_message(channel, embed = discord.Embed(colour = discord.Colour.green()).add_field(name = "Success", value = message).set_footer(text = ident))	
@@ -268,15 +297,49 @@ async def scores(message):
 		for n, s in sorted(zip(mods, (sum(1 for c in state.cases if c.embed.fields[3].value == n) for n in mods)),
 			key = lambda p: p[1], reverse = True)), "Leaderboard")
 
+@cmd("Updates Tattle to the latest version.")
+async def update(message):
+	if not git:
+		raise safe_exception(git_error)
+	updater = await client.send_message(message.channel,
+		embed = discord.Embed(colour = discord.Colour.blue())
+		.add_field(name = "Updater", value = "Checking for updates...")
+		.set_footer(text = ident))
+	state.updater = (updater.channel, updater.id)
+	with urllib.request.urlopen(urllib.request.Request("https://api.github.com/repos/bonehurtingjuice/tattle/commits/HEAD", headers = {"Accept": "application/vnd.github.full.sha"})) as fobj:
+		state.remote_version = fobj.read(7).decode()
+	if state.remote_version == version:
+		await client.edit_message(updater, embed = discord.Embed(colour = discord.Colour.green())
+			.add_field(name = "Updater", value = "Tattle is already up-to-date.")
+			.set_footer(text = ident))
+		return
+	await client.edit_message(updater, embed = discord.Embed(colour = discord.Colour.yellow())
+		.add_field(name = "Updater", value = f"Downloading version {remote_version}...")
+		.set_footer(text = ident))
+	repo.remote("origin").pull()
+	restart()
+
 # Our loop polls Reddit every 30 seconds, because such a big and
 # important and oh so cool Web site wouldn't be caught dead pushing
 # events to a puny bot, no siree bob.
 async def loop():
-	await client.wait_until_ready()
 	global log_channel, alert_channel
+	await client.wait_until_ready()
 	log_channel = client.get_channel(config["log_channel"])
 	alert_channel = client.get_channel(config["alert_channel"])
+	await state_lock.acquire()
+	if state.updater:
+		await client.edit_message(await client.get_message(*state.updater),
+			embed = discord.Embed(colour = discord.Colour.green())
+			.add_field(name = "Updater", value = "Tattle was updated successfully.")
+			.set_footer(text = ident) if state.remote_version == version else
+			discord.Embed(colour = discord.Colour.red())
+			.add_field(name = "Updater", value = "Update failed.")
+			.set_footer(text = ident))
+		state.updater = None
+	state_lock.release()
 	while not client.is_closed:
+		await state_lock.acquire()
 		try:
 			nowtime = datetime.datetime.now().strftime(
 				"%H:%M:%S %A %d %B %Y")
@@ -353,15 +416,16 @@ async def loop():
 			if newlastupdate > state.lastupdate:
 				state.lastupdate = newlastupdate
 				save_state()
-			
-			# Play nice with Reddit.
-			await asyncio.sleep(30)
 		except KeyboardInterrupt:
 			print("Exiting.")
 			break
 		except:
 			traceback.print_exc()
 			print("Continuing.")
+		finally:
+			state_lock.release()
+		# Play nice with Reddit.
+		await asyncio.sleep(30)
 
 @client.event
 async def on_ready():
@@ -377,6 +441,7 @@ async def on_message(message):
 			await send_error(message.channel, "Please specify a command.")
 			return
 		if command in commands:
+			await state_lock.acquire()
 			try:
 				await commands[command](message)
 			except safe_exception as ex:
@@ -384,10 +449,17 @@ async def on_message(message):
 			except Exception as ex:
 				traceback.print_exc()
 				await send_error(message.channel, "Internal error.")
+			finally:
+				state_lock.release()
 		else:
 			await send_error(message.channel, f"Unknown command {command}.")
 
 client.loop.create_task(loop())
 print("Connecting to Discord...")
-client.run(config["discord"])
-
+try:
+	client.run(config["discord"])
+except KeyboardInterrupt:
+	pass
+except:
+	print("Bot crashed - restarting.")
+	restart()
