@@ -75,11 +75,8 @@ except FileNotFoundError:
 class thing:
 	pass
 
-# All the server sees of a normal exception is "Internal error", because
-# exceptions from other people's code could have absolutely anything in
-# the messages.  However, exceptions are still useful to kill a command
-# when it fails, so safe_exception()s are assumed to have safe messages
-# and will be forwarded to the end user.
+# This used to be the only type of exception that would give details
+# on the server.  Now it's just formatted prettier than the rest.
 class safe_exception(Exception):
 	pass
 
@@ -118,7 +115,7 @@ print("Connected to Reddit.")
 client = discord.Client()
 
 # Restarts the bot process.
-def restart():
+def do_restart():
 	os.execv(sys.executable, [sys.executable] + sys.argv)
 
 async def send_success(channel, message):
@@ -323,7 +320,11 @@ async def update(message):
 		.add_field(name = "Updater", value = f"Downloading version {state.remote_version}...")
 		.set_footer(text = ident))
 	repo.remote("origin").pull()
-	restart()
+	do_restart()
+
+@cmd("Restarts Tattle.")
+async def restart(message):
+	do_restart()
 
 # Our loop polls Reddit every 30 seconds, because such a big and
 # important and oh so cool Web site wouldn't be caught dead pushing
@@ -454,7 +455,7 @@ async def on_message(message):
 				await send_error(message.channel, ex)
 			except Exception as ex:
 				traceback.print_exc()
-				await send_error(message.channel, "Internal error.")
+				await send_error(message.channel, f"{ex.__class__}: {ex}")
 			finally:
 				state_lock.release()
 		else:
@@ -468,4 +469,4 @@ except KeyboardInterrupt:
 	pass
 except:
 	print("Bot crashed - restarting.")
-	restart()
+	do_restart()
