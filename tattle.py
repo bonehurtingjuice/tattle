@@ -324,6 +324,7 @@ async def update(message):
 
 @cmd("Restarts Tattle.")
 async def restart(message):
+	state.restarting = message.channel
 	do_restart()
 
 # Our loop polls Reddit every 30 seconds, because such a big and
@@ -344,6 +345,9 @@ async def loop():
 			.add_field(name = "Updater", value = "Update failed.")
 			.set_footer(text = ident))
 		state.updater = None
+	if hasattr(state, "restart"):
+		await send_success(state.restart, "Tattle has been restarted.")
+		del state.restart
 	state_lock.release()
 	while not client.is_closed:
 		await state_lock.acquire()
