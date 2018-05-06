@@ -86,6 +86,9 @@ class safe_exception(Exception):
 try:
 	with open("state.pickle", "rb") as fobj:
 		state = pickle.load(fobj)
+		if not hasattr(state, "updater"):
+			state.updater = None
+			state.remote_version = None
 except FileNotFoundError:
 	print("state.pickle not found.  Setting up a new database.")
 	state = thing()
