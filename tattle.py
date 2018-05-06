@@ -293,7 +293,7 @@ async def pose(message):
 
 @cmd("Lists all moderators and how many posts they have removed.")
 async def scores(message):
-	mods = list(set(c.embed.fields[3].value for c in state.cases))
+	mods = list(set(c.embed.fields[3].value for c in state.cases if c))
 	await send_list(message, (f"/u/{n} - {s}"
 		for n, s in sorted(zip(mods, (sum(1 for c in state.cases if c and c.embed.fields[3].value == n) for n in mods)),
 			key = lambda p: p[1], reverse = True)), "Leaderboard")
