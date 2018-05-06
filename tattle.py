@@ -324,7 +324,7 @@ async def update(message):
 
 @cmd("Restarts Tattle.")
 async def restart(message):
-	state.restarting = message.channel
+	state.restart = message.channel
 	save_state()
 	do_restart()
 
