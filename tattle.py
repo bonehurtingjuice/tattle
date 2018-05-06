@@ -270,7 +270,7 @@ async def justify(message):
 
 # Formats a list into a string and sends it in an embed.
 async def send_list(message, l, name):
-	ls = "\n".join(l)
+	ls = "\n".join(l).replace("_", "\\_")
 	if not ls:
 		ls = "\u200b" # Empty embed fields not allowed
 	await client.send_message(message.channel,
