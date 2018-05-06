@@ -325,6 +325,7 @@ async def update(message):
 @cmd("Restarts Tattle.")
 async def restart(message):
 	state.restarting = message.channel
+	save_state()
 	do_restart()
 
 # Our loop polls Reddit every 30 seconds, because such a big and
