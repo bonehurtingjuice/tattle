@@ -295,7 +295,7 @@ async def pose(message):
 async def scores(message):
 	mods = list(set(c.embed.fields[3].value for c in state.cases))
 	await send_list(message, (f"/u/{n} - {s}"
-		for n, s in sorted(zip(mods, (sum(1 for c in state.cases if c.embed.fields[3].value == n) for n in mods)),
+		for n, s in sorted(zip(mods, (sum(1 for c in state.cases if c and c.embed.fields[3].value == n) for n in mods)),
 			key = lambda p: p[1], reverse = True)), "Leaderboard")
 
 @cmd("Updates Tattle to the latest version.")
@@ -455,7 +455,7 @@ async def on_message(message):
 				await send_error(message.channel, ex)
 			except Exception as ex:
 				traceback.print_exc()
-				await send_error(message.channel, f"{ex.__class__}: {ex}")
+				await send_error(message.channel, f"{ex.__class__.__name__}: {ex}")
 			finally:
 				state_lock.release()
 		else:
