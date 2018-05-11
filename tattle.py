@@ -421,8 +421,10 @@ async def loop():
 				log.msgid = (await client.send_message(log_channel, embed = log.embed)).id
 				state.cases[int(log.embed.fields[6].value)] = log
 			
-			for user in users:
-				await client.send_message(alert_channel, f"<@&{config['alert_role']}> /u/{user} has made {len(state.users[user])} removed posts.")
+			if users:
+				await client.send_message(alert_channel, f"<@&{config['alert_role']}>", embed = discord.Embed(colour = discord.Colour.dark_red())
+					.add_field(name = "Alerts", value = "\n".join(f"/u/{user} has made {len(state.users[user]} removed posts." for user in users))
+					.set_footer(text = ident))
 			
 			print("All log entries have been dispatched to Discord.")
 			if newlastupdate > state.lastupdate:
