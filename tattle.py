@@ -423,7 +423,7 @@ async def loop():
 			
 			if users:
 				await client.send_message(alert_channel, f"<@&{config['alert_role']}>", embed = discord.Embed(colour = discord.Colour.dark_red())
-					.add_field(name = "Alerts", value = "\n".join(f"/u/{user} has made {len(state.users[user]} removed posts." for user in users))
+					.add_field(name = "Alerts", value = "\n".join(f"/u/{user} has made {len(state.users[user])} removed posts." for user in users))
 					.set_footer(text = ident))
 			
 			print("All log entries have been dispatched to Discord.")
